@@ -1,3 +1,9 @@
+![Platform](https://img.shields.io/badge/platform-Android-green?logo=android)
+![Language](https://img.shields.io/badge/language-Kotlin-blue?logo=kotlin)
+![Status](https://img.shields.io/badge/status-active-brightgreen)
+![GitHub Stars](https://img.shields.io/github/stars/Benyamin0711/HabitAway?style=social)
+![GitHub Forks](https://img.shields.io/github/forks/Benyamin0711/HabitAway?style=social)
+
 # 🧠 HabitAway | راه رهایی
 
 > یک اپلیکیشن اندرویدی برای ترک عادت‌های بد و ساختن سبک زندگی سالم، با طراحی مدرن و تجربه کاربری روان  
