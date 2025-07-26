@@ -3,9 +3,6 @@
 > یک اپلیکیشن اندرویدی برای ترک عادت‌های بد و ساختن سبک زندگی سالم، با طراحی مدرن و تجربه کاربری روان  
 > An Android app for breaking bad habits and building a healthy lifestyle, with a modern design and smooth UX
 
----
-
-## 📱 Screenshots | تصاویر
 <img align = "right" alt ="Benyamin" width="400" src="https://github.com/Benyamin0711/HabitAway/blob/main/app/src/main/res/drawable/habit_logo.png">
 
 ---
