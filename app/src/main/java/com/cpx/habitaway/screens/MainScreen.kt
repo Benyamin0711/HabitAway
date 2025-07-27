@@ -2,42 +2,68 @@
 
 package com.cpx.habitaway.screens
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.cpx.habitaway.Classes.AuthViewModel
 import com.cpx.habitaway.R
 import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
+
+sealed class BottomNavScreen(val route: String, val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector){
+    object Home : BottomNavScreen("home", "خانه", Icons.Default.Home)
+    object Profile : BottomNavScreen("profile", "پروفایل", Icons.Default.Person)
+}
 
 @Composable
 fun MainScreen(
-    //userName: String = "بنیامین",
-    habits: List<Habit> = sampleHabits
+    navController: NavHostController,
+    authViewModel: AuthViewModel = viewModel()
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val isLoggedIn = authViewModel.isLoggedIn
+
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        scrimColor = Color.Black.copy(alpha = 0.80f),
         drawerContent = {
-            DrawerContent {
-                scope.launch { drawerState.close() }
-            }
+            DrawerContent (
+                onClose = { scope.launch { drawerState.close() } },
+                navController = navController,
+                isLoggedIn = isLoggedIn
+            )
         }
     ) {
         Scaffold(
@@ -51,7 +77,7 @@ fun MainScreen(
                         )
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = Color(0xFF6200EE),
+                        containerColor = Color(0xFF673AB7),
                         titleContentColor = Color.White
                     ),
                     actions = {
@@ -76,24 +102,13 @@ fun MainScreen(
                     }
                 )
             },
-            floatingActionButton = {
-                FloatingActionButton(onClick = { /* افزودن عادت */ }) {
-                    Icon(Icons.Default.Add, contentDescription = "افزودن عادت")
-                }
-            },
             bottomBar = {
-                NavigationBar {
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, contentDescription = "خانه") },
-                        selected = true,
-                        onClick = { /* خانه */ }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Person, contentDescription = "پروفایل") },
-                        selected = false,
-                        onClick = { /* پروفایل */ }
-                    )
-                }
+                CustomBottomBar(
+                    onFabClick = {},
+                    onItemClick = { title: String -> },
+                    navController = navController,
+                    isLoggedIn = isLoggedIn
+                )
             }
         ) { innerPadding ->
             Column(
@@ -102,96 +117,221 @@ fun MainScreen(
                     .padding(16.dp)
                     .fillMaxSize()
             ) {
-                Text("امروز وقتشه که یه قدم دیگه برداری!", fontSize = 16.sp)
+                UserCard()
+            }
+        }
+    }
+}
+
+@Composable
+fun DrawerContent(
+    onClose: () -> Unit,
+    navController: NavController,
+    isLoggedIn: Boolean) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp)
+    ) {
+
+        Card(
+            modifier = Modifier.fillMaxHeight().width(220.dp).padding(16.dp),
+            shape = MaterialTheme.shapes.medium,
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFEFEFEF)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(id = R.drawable.avatar_placeholder),
+                        contentDescription = "avatar",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(MaterialTheme.shapes.medium)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text("Benyamin", fontSize = 18.sp, color = Color.Black)
+                        Text("Online", fontSize = 14.sp, color = Color.Gray)
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
 
-                LinearProgressIndicator(
-                    progress = { calculateProgress(habits) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp),
-                    color = MaterialTheme.colorScheme.primary
-                )
+                DrawerItem("خانه", Icons.Default.Home, onClick = onClose)
+                DrawerItem("پروفایل", Icons.Default.Person, onClick = {
+                    onClose()
+                    if (isLoggedIn){
+                        navController.navigate("profile")
+                    } else {
+                        navController.navigate("Auth")
+                    }
+                })
+                DrawerItem("تنظیمات", Icons.Default.Settings, onClick = onClose)
+                DrawerItem("درباره ما", Icons.Default.Info, onClick = onClose)
+                Spacer(modifier = Modifier.weight(1f))
+                DrawerItem(title = "خروج", icon = Icons.Default.ExitToApp, onClick = { exitProcess(0) }, color = Color.Red)
+            }
+        }
 
-                Spacer(modifier = Modifier.height(24.dp))
 
-                Text("عادت‌های امروز:", style = MaterialTheme.typography.titleMedium)
 
-                Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
 
-                LazyColumn {
-                    items(habits) { habit ->
-                        HabitItem(habit)
-                        HorizontalDivider(
-                            color = Color.Gray,
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            thickness = 1.dp
+@Composable
+fun CustomBottomBar(
+    onFabClick: () -> Unit,
+    onItemClick: (String) -> Unit,
+    navController: NavController,
+    isLoggedIn : Boolean
+){
+    val item =listOf("پروفایل", "سالن مطالعه", "تلوزیون", "روتین")
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(81.dp)
+            .background(Color(0xFF1C1C2D))
+    ){
+        Row (modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            item.forEachIndexed { index, item ->
+                if (index == 2){
+                    Spacer(modifier = Modifier.width(64.dp))
+                }
+                Column(horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable{ onItemClick(item) }
+                ){
+                    if (item == "پروفایل"){
+                        if (isLoggedIn){
+                            navController.navigate("profile")
+                        }else{
+                            navController.navigate("Auth")
+                            Image(
+                                painter = painterResource(id = R.drawable.avatar_placeholder),
+                                contentDescription = "item",
+                                modifier = Modifier.size(24.dp)
+                                    .clip(MaterialTheme.shapes.medium )
+                            )
+                        }
+
+                    }else{
+                        Icon(
+                            painter = painterResource(
+                                id = when (item){
+                                    "تلوزیون" -> R.drawable.television
+                                    "سالن مطالعه" -> R.drawable.book
+                                    "روتین" -> R.drawable.check
+                                    else -> R.drawable.check
+                                }
+                            ),
+                            contentDescription = item,
+                            tint = Color.LightGray,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = item, fontSize = 12.sp, color = Color.LightGray)
                 }
             }
         }
-    }
-}
-
-@Composable
-fun DrawerContent(onClose: () -> Unit) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("منو", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "تنظیمات",
+        FloatingActionButton(
+            onClick = onFabClick,
             modifier = Modifier
-                .clickable { onClose() }
-                .padding(8.dp),
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Text(
-            text = "درباره ما",
-            modifier = Modifier
-                .clickable { onClose() }
-                .padding(8.dp),
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
-}
-
-@Composable
-fun HabitItem(habit: Habit) {
-    var isChecked by remember { mutableStateOf(habit.isCompleted) }
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        Checkbox(
-            checked = isChecked,
-            onCheckedChange = {
-                isChecked = it
-                // اینجا می‌تونی وضعیت جدید رو ذخیره کنی
-            }
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Column {
-            Text(habit.name, fontSize = 16.sp)
-            Text("زمان: ${habit.time}", fontSize = 12.sp, color = Color.Gray)
+                .align(Alignment.TopCenter)
+                .offset(y = (-20).dp)
+                .size(65.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.habit_logo),
+                contentDescription = "Logo",
+                modifier = Modifier.size(66.dp)
+            )
         }
     }
 }
 
-data class Habit(val name: String, val time: String, val isCompleted: Boolean)
+@Composable
+fun DrawerItem(
+    title: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    color: Color = Color.Black
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(icon, contentDescription = title, tint = color)
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(text = title, fontSize = 16.sp, color = color)
+    }
+}
 
-val sampleHabits = listOf(
-    Habit("مطالعه ۳۰ دقیقه", "08:00", false),
-    Habit("ورزش صبحگاهی", "09:00", true),
-    Habit("تمرین کدنویسی", "10:00", false)
-)
+@Composable
+fun UserCard(){
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(Color(0xFF1F2937), Color(0xFF111827)))
+            )
+            .shadow(8.dp, RoundedCornerShape(20.dp))
+            .padding(16.dp)
+    )
+    {
+        Row (
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ){
+            Column (
+                horizontalAlignment = Alignment.CenterHorizontally
+            )
+            {
+                Box(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF00BCD4)),
+                    contentAlignment = Alignment.Center
+                ){
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "League Icon",
+                        tint = Color.White,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "LVL 80",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
-fun calculateProgress(habits: List<Habit>): Float {
-    if (habits.isEmpty()) return 0f
-    val completed = habits.count { it.isCompleted }
-    return completed.toFloat() / habits.size
+            Text(
+                text = "از خاکستر ها بر می خیزم",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+    }
 }

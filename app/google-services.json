@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "372355609931",
+    "project_id": "habitaway-cpx",
+    "storage_bucket": "habitaway-cpx.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:372355609931:android:e762f8f21688156b3364ce",
+        "android_client_info": {
+          "package_name": "com.cpx.habitaway"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDGPe-NqPp5UDutW7_FvctfKEQWIQrPYg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
