@@ -4,7 +4,10 @@
 > An Android app for breaking bad habits and building a healthy lifestyle, with a modern design and smooth UX
 
 ---
-![Logo](https://raw.githubusercontent.com/Benyamin0711/HabitAway/main/app/src/main/res/drawable/habit_logo.png)
+
+<div align="right" style="border: 2px solid #ccc; display: inline-block; padding: 5px; border-radius: 6px; width: 120px;">
+  <img src="https://raw.githubusercontent.com/Benyamin0711/HabitAway/main/app/src/main/res/drawable/habit_logo.png" alt="HabitAway Logo" width="120" />
+</div>
 
 ---
 
@@ -28,4 +31,3 @@
 | سایر ابزارها          | Android Studio, Material 3, Accompanist, Coroutine |
 
 ---
-
