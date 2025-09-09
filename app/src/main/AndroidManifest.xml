@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HabitAway">
         <activity
-            android:name=".MainActivity"
+            android:name="com.benyaminrasouli.habitaway.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.HabitAway">
             <intent-filter>

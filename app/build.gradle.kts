@@ -2,14 +2,16 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("org.jetbrains.kotlin.kapt")
+    id("com.google.devtools.ksp") version "1.9.24-1.0.20"
 }
 
 android {
-    namespace = "com.cpx.habitaway"
+    namespace = "com.benyaminrasouli.habitaway"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.cpx.habitaway"
+        applicationId = "com.benyaminrasouli.habitaway"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -37,27 +39,29 @@ android {
     buildFeatures {
         compose = true
     }
-
-    // ===== حتماً این رو اضافه کن =====
-    composeOptions {
-        // مقدار زیر یکی از ورژن‌های متداول کامپایلر است؛ اگه با BOMت همخوانی نداره، مقدار مناسب رو انتخاب کن
-        kotlinCompilerExtensionVersion = "1.5.3"
+    lint {
+        abortOnError = false
     }
+
 }
 
 dependencies {
-    // --- Compose BOM (یکبار، مدیریت نسخه‌ها رو BOM انجام میده) ---
-    implementation(platform("androidx.compose:compose-bom:2024.10.00"))
+    //دیتابیس
+    val room_version = "2.7.2" // آخرین نسخه پایدار
+
+    implementation("androidx.room:room-runtime:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
 
     // --- Core Compose / Activity / Navigation / Foundation / Material3 / Icons ---
-    implementation("androidx.activity:activity-compose:1.8.0")        // activity-compose
-    implementation("androidx.navigation:navigation-compose:2.7.0")    // navigation
+    implementation("androidx.activity:activity-compose:1.10.1")        // activity-compose
+    implementation("androidx.navigation:navigation-compose:2.9.3")    // navigation
     implementation("androidx.compose.material3:material3")            // material3 (نسخه توسط BOM مدیریت می‌شود)
     implementation("androidx.compose.material:material-icons-extended") // extended icons
     implementation("androidx.compose.foundation:foundation")          // LazyRow, FlowRow و ...
 
     // --- Coil برای لود عکس‌ها ---
-    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
     // --- بقیه وابستگی‌های پروژه (با استفاده از catalog اگر داری) ---
     implementation(libs.androidx.core.ktx)
@@ -76,5 +80,10 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:1.9.0")
 // متناسب با نسخه‌ی Compose پروژه‌ات
     implementation("androidx.compose.material3:material3:1.3.2")
-// یا ورژن مناسب پروژه‌ات
+
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+
+
 }
